@@ -13,8 +13,8 @@ spec:
     - matrix:
         generators:
           - git:
-              repoURL: '{{.metadata.annotations.gitops_repo_url}}'
-              revision: '{{.metadata.annotations.gitops_repo_revision}}'
+              repoURL: https://github.com/rivasjp/gitops
+              revision: main
               files:
                 - path: 'platform/addons/*/config.yaml'
           - clusters:

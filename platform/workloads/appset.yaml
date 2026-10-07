@@ -26,9 +26,15 @@ spec:
   generators:
     - matrix:
         generators:
+          # Literal, not templated from annotations: this is the FIRST
+          # generator in the matrix, so no cluster params exist yet and
+          # {{.metadata.*}} would render empty ("repository not found").
+          # Reversing the order is not an option — the selector below needs
+          # .enableLabel from these files, which would be circular.
+          # Harmless duplication: this appset lives in the repo it names.
           - git:
-              repoURL: '{{.metadata.annotations.gitops_repo_url}}'
-              revision: '{{.metadata.annotations.gitops_repo_revision}}'
+              repoURL: https://github.com/rivasjp/gitops
+              revision: main
               files:
                 - path: 'platform/workloads/*/config.yaml'
           - clusters:
