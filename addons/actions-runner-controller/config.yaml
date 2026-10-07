@@ -1,0 +1,6 @@
+namespace: arc-systems
+chart:
+  repoURL: ghcr.io/actions/actions-runner-controller-charts
+  name: gha-runner-scale-set-controller
+  version: 0.15.0
+  releaseName: arc
