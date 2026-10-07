@@ -1,4 +1,3 @@
-# Platform addons. One Application per (cluster x addon).
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -8,21 +7,23 @@ spec:
   goTemplate: true
   goTemplateOptions:
     - missingkey=error
+  syncPolicy:
+    preserveResourcesOnDeletion: true
   generators:
     - matrix:
         generators:
           - git:
-              repoURL: https://github.com/rivasjp/gitops
-              revision: main
+              repoURL: '{{.metadata.annotations.gitops_repo_url}}'
+              revision: '{{.metadata.annotations.gitops_repo_revision}}'
               files:
-                - path: addons/*/config.yaml
+                - path: 'platform/addons/*/config.yaml'
           - clusters:
               selector:
                 matchLabels:
-                  enable_{{.path.basename}}: "true"
+                  '{{.enableLabel}}': "true"
   template:
     metadata:
-      name: '{{.path.basename}}-{{.name}}'
+      name: 'addon-{{.name}}-{{.path.basename}}'
     spec:
       project: default
       sources:
@@ -32,7 +33,8 @@ spec:
           helm:
             releaseName: '{{.chart.releaseName}}'
             valueFiles:
-              - $values/{{.path.path}}/values.yaml
+              - $values/platform/addons/{{.path.basename}}/values.yaml
+              - $values/{{.metadata.labels.environment}}/addons/{{.path.basename}}/values.yaml
             ignoreMissingValueFiles: true
         - repoURL: '{{.metadata.annotations.gitops_repo_url}}'
           targetRevision: '{{.metadata.annotations.gitops_repo_revision}}'
