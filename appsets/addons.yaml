@@ -16,7 +16,7 @@ spec:
               repoURL: https://github.com/rivasjp/gitops
               revision: main
               files:
-                - path: 'platform/addons/*/config.yaml'
+                - path: 'addons/*/addon.yaml'
           - clusters:
               selector:
                 matchLabels:
@@ -33,20 +33,12 @@ spec:
           helm:
             releaseName: '{{.chart.releaseName}}'
             valueFiles:
-              - $values/platform/addons/{{.path.basename}}/values.yaml
+              - $values/addons/{{.path.basename}}/values.yaml
               - $values/environments/{{.metadata.labels.environment}}/addons/{{.path.basename}}/values.yaml
             ignoreMissingValueFiles: true
         - repoURL: '{{.metadata.annotations.gitops_repo_url}}'
           targetRevision: '{{.metadata.annotations.gitops_repo_revision}}'
           ref: values
-        # Addon-owned CRs. The path is the addon directory, not manifests/,
-        # which ArgoCD errors on when an addon does not have one.
-        - repoURL: '{{.metadata.annotations.gitops_repo_url}}'
-          targetRevision: '{{.metadata.annotations.gitops_repo_revision}}'
-          path: 'platform/addons/{{.path.basename}}'
-          directory:
-            recurse: true
-            include: 'manifests/*.yaml'
       destination:
         name: '{{.name}}'
         namespace: '{{.namespace}}'
@@ -56,9 +48,4 @@ spec:
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
-          # Operator charts ship large CRDs. Client-side apply stores the whole
-          # resource in the kubectl.kubernetes.io/last-applied-configuration
-          # annotation, and annotations cap at 256KB — ARC's CRDs exceed it and
-          # fail with "metadata.annotations: Too long". Server-side apply does
-          # not write that annotation.
           - ServerSideApply=true
