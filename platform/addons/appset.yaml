@@ -34,11 +34,19 @@ spec:
             releaseName: '{{.chart.releaseName}}'
             valueFiles:
               - $values/platform/addons/{{.path.basename}}/values.yaml
-              - $values/{{.metadata.labels.environment}}/addons/{{.path.basename}}/values.yaml
+              - $values/environments/{{.metadata.labels.environment}}/addons/{{.path.basename}}/values.yaml
             ignoreMissingValueFiles: true
         - repoURL: '{{.metadata.annotations.gitops_repo_url}}'
           targetRevision: '{{.metadata.annotations.gitops_repo_revision}}'
           ref: values
+        # Addon-owned CRs. The path is the addon directory, not manifests/,
+        # which ArgoCD errors on when an addon does not have one.
+        - repoURL: '{{.metadata.annotations.gitops_repo_url}}'
+          targetRevision: '{{.metadata.annotations.gitops_repo_revision}}'
+          path: 'platform/addons/{{.path.basename}}'
+          directory:
+            recurse: true
+            include: 'manifests/*.yaml'
       destination:
         name: '{{.name}}'
         namespace: '{{.namespace}}'

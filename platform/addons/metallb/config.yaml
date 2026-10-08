@@ -1,0 +1,7 @@
+enableLabel: enable_metallb
+namespace: metallb-system
+chart:
+  repoURL: https://metallb.github.io/metallb
+  name: metallb
+  version: 0.16.1
+  releaseName: metallb

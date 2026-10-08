@@ -57,7 +57,7 @@ spec:
             # so the overlay holds only deltas and may not exist at all.
             valueFiles:
               - $values/platform/workloads/{{.path.basename}}/values.yaml
-              - $values/{{.metadata.labels.environment}}/workloads/{{.path.basename}}/values.yaml
+              - $values/environments/{{.metadata.labels.environment}}/workloads/{{.path.basename}}/values.yaml
             ignoreMissingValueFiles: true
         # Exists only so $values above resolves into THIS repo rather than the
         # chart's registry.
