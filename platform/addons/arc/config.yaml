@@ -1,4 +1,4 @@
-enableLabel: enable_actions_runner_controller
+enableLabel: enable_arc
 namespace: arc-systems
 chart:
   repoURL: ghcr.io/actions/actions-runner-controller-charts
