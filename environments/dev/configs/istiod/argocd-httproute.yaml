@@ -5,10 +5,10 @@ metadata:
   namespace: argocd
 spec:
   parentRefs:
-    - name: lan
+    - name: internal
       namespace: istio-system
   hostnames:
-    - argocd.arceon.run
+    - argocd.dev.arceon.run
   rules:
     - backendRefs:
         - name: argo-cd-argocd-server
