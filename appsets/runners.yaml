@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: runners
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  generators:
+    - matrix:
+        generators:
+          - git:
+              repoURL: https://github.com/rivasjp/gitops
+              revision: main
+              directories:
+                - path: 'environments/*/runners/*'
+          - clusters:
+              selector:
+                matchLabels:
+                  environment: '{{index .path.segments 1}}'
+  template:
+    metadata:
+      name: 'runner-{{.name}}-{{.path.basename}}'
+    spec:
+      project: default
+      sources:
+        # Pinned here, not per pool: ARC requires the runner scale set and the
+        # controller to be on the same version, so they move together.
+        - repoURL: ghcr.io/actions/actions-runner-controller-charts
+          chart: gha-runner-scale-set
+          targetRevision: 0.15.0
+          helm:
+            # Becomes the `runs-on:` label in workflows.
+            releaseName: '{{.path.basename}}'
+            valueFiles:
+              - $values/{{.path.path}}/values.yaml
+        - repoURL: '{{.metadata.annotations.gitops_repo_url}}'
+          targetRevision: '{{.metadata.annotations.gitops_repo_revision}}'
+          ref: values
+      destination:
+        name: '{{.name}}'
+        namespace: arc-runners
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
