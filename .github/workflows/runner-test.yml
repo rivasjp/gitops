@@ -1,0 +1,20 @@
+name: runner-test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  matrix-demo:
+    runs-on: general
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        shape: [circle, square]
+        size: [small, large]
+    steps:
+      - name: Report
+        run: |
+          echo "shape=${{ matrix.shape }} size=${{ matrix.size }}"
+          echo "pod=$(hostname)"
+          echo "node=${NODE_NAME:-unknown}"
