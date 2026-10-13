@@ -1,0 +1,70 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: garage-bootstrap
+  namespace: garage
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      serviceAccountName: garage-bootstrap
+      restartPolicy: OnFailure
+      containers:
+        - name: bootstrap
+          image: alpine/k8s:1.33.13
+          command:
+            - /bin/sh
+            - -ce
+            - |
+              EXEC="kubectl exec -n garage garage-0 -- /garage"
+
+              echo "waiting for garage-0 to be ready..."
+              kubectl wait -n garage pod/garage-0 --for=condition=Ready --timeout=120s
+
+              STATUS=$($EXEC status)
+              if echo "$STATUS" | grep -q "NO ROLE ASSIGNED"; then
+                echo "assigning layout..."
+                NODE_ID=$(echo "$STATUS" | awk '/NO ROLE ASSIGNED/ {print $1}')
+                $EXEC layout assign -z dc1 -c 10G "$NODE_ID"
+                VERSION=$($EXEC layout show | grep -oE 'layout apply --version [0-9]+' | awk '{print $NF}')
+                $EXEC layout apply --version "$VERSION"
+              else
+                echo "layout already assigned, skipping"
+              fi
+
+              EXISTING_BUCKETS=$($EXEC bucket list)
+              for b in logs traces metrics; do
+                if echo "$EXISTING_BUCKETS" | grep -qw "$b"; then
+                  echo "bucket $b already exists, skipping"
+                else
+                  echo "creating bucket $b..."
+                  $EXEC bucket create "$b"
+                fi
+              done
+
+              if kubectl get secret garage-lgtm-credentials -n garage >/dev/null 2>&1; then
+                echo "garage-lgtm-credentials already exists, skipping key creation"
+              else
+                if $EXEC key info lgtm >/dev/null 2>&1; then
+                  echo "ERROR: key 'lgtm' exists in garage but garage-lgtm-credentials Secret is missing." >&2
+                  echo "Its secret can't be recovered. Delete the 'lgtm' key manually and rerun, or" >&2
+                  echo "recreate the Secret by hand if you still have the value." >&2
+                  exit 1
+                fi
+                echo "creating key lgtm..."
+                KEY_OUT=$($EXEC key create lgtm)
+                KEY_ID=$(echo "$KEY_OUT" | awk -F': *' '/Key ID:/ {print $2}')
+                KEY_SECRET=$(echo "$KEY_OUT" | awk -F': *' '/Secret key:/ {print $2}')
+                kubectl create secret generic garage-lgtm-credentials -n garage \
+                  --from-literal=access_key_id="$KEY_ID" \
+                  --from-literal=secret_access_key="$KEY_SECRET" \
+                  --from-literal=endpoint="garage.garage.svc.cluster.local:3900" \
+                  --from-literal=region="garage"
+              fi
+
+              for b in logs traces metrics; do
+                echo "granting lgtm read/write on $b..."
+                $EXEC bucket allow --read --write "$b" --key lgtm
+              done
+
+              echo "bootstrap complete"
