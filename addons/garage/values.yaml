@@ -1,6 +1,11 @@
 garage:
   replicationFactor: "1"
 
+  rpc:
+    secret:
+      create: false
+      name: garage-rpc-secret
+
 deployment:
   replicaCount: 1
 
