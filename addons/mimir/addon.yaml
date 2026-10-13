@@ -1,0 +1,7 @@
+enableLabel: enable_mimir
+namespace: mimir
+chart:
+  repoURL: https://grafana.github.io/helm-charts
+  name: mimir-distributed
+  version: 6.2.1
+  releaseName: mimir
