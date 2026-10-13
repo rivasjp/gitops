@@ -1,0 +1,11 @@
+garage:
+  replicationFactor: "1"
+
+deployment:
+  replicaCount: 1
+
+persistence:
+  meta:
+    size: 1Gi
+  data:
+    size: 10Gi

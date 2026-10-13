@@ -1,0 +1,7 @@
+enableLabel: enable_garage
+namespace: garage
+chart:
+  repoURL: https://charts.derwitt.dev
+  name: garage
+  version: 2.4.2
+  releaseName: garage
