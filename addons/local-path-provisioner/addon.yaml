@@ -1,0 +1,7 @@
+enableLabel: enable_local_path_provisioner
+namespace: local-path-storage
+chart:
+  repoURL: https://charts.containeroo.ch
+  name: local-path-provisioner
+  version: 0.0.38
+  releaseName: local-path-provisioner

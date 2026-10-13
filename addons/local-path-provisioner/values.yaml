@@ -1,0 +1,3 @@
+# Only provisioner in the cluster, so make it the default StorageClass.
+storageClass:
+  defaultClass: true
