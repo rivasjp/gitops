@@ -1,0 +1,10 @@
+alertmanager:
+  enabled: false
+prometheus-pushgateway:
+  enabled: false
+
+server:
+  remoteWrite:
+    - url: http://mimir-gateway.mimir.svc.cluster.local/api/v1/push
+      headers:
+        X-Scope-OrgID: anonymous
