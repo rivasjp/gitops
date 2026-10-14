@@ -1,0 +1,76 @@
+deploymentMode: Distributed
+
+loki:
+  auth_enabled: false
+  commonConfig:
+    replication_factor: 1
+  schemaConfig:
+    configs:
+      - from: "2026-10-14"
+        store: tsdb
+        object_store: s3
+        schema: v13
+        index:
+          prefix: index_
+          period: 24h
+  storage:
+    type: s3
+    bucketNames:
+      chunks: logs
+    s3:
+      endpoint: garage.garage.svc.cluster.local:3900
+      region: garage
+      accessKeyId: ${GARAGE_ACCESS_KEY_ID}
+      secretAccessKey: ${GARAGE_SECRET_ACCESS_KEY}
+      s3ForcePathStyle: true
+      insecure: true
+
+global:
+  extraArgs:
+    - -config.expand-env=true
+  extraEnvFrom:
+    - secretRef:
+        name: garage-loki-credentials
+
+ingester:
+  replicas: 1
+  zoneAwareReplication:
+    enabled: false
+  persistence:
+    enabled: true
+distributor:
+  replicas: 1
+querier:
+  replicas: 1
+queryFrontend:
+  replicas: 1
+queryScheduler:
+  replicas: 1
+indexGateway:
+  replicas: 1
+compactor:
+  replicas: 1
+
+ruler:
+  enabled: false
+
+read:
+  replicas: 0
+write:
+  replicas: 0
+backend:
+  replicas: 0
+singleBinary:
+  replicas: 0
+
+chunksCache:
+  enabled: false
+resultsCache:
+  enabled: false
+lokiCanary:
+  enabled: false
+test:
+  enabled: false
+sidecar:
+  rules:
+    enabled: false

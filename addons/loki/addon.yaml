@@ -1,0 +1,7 @@
+enableLabel: enable_loki
+namespace: loki
+chart:
+  repoURL: https://grafana.github.io/helm-charts
+  name: loki
+  version: 7.3.0
+  releaseName: loki
