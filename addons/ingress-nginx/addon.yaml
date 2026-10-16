@@ -1,0 +1,7 @@
+enableLabel: enable_ingress_nginx
+namespace: ingress-nginx
+chart:
+  repoURL: https://kubernetes.github.io/ingress-nginx
+  name: ingress-nginx
+  version: 4.15.1
+  releaseName: ingress-nginx

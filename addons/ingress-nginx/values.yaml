@@ -1,0 +1,14 @@
+controller:
+  service:
+    annotations:
+      metallb.io/loadBalancerIPs: 192.168.100.51
+  metrics:
+    enabled: true
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "10254"
+  admissionWebhooks:
+    enabled: false
+  allowSnippetAnnotations: true
+  config:
+    annotations-risk-level: Critical
