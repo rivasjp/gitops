@@ -1,0 +1,34 @@
+admin:
+  existingSecret: grafana-admin
+
+persistence:
+  enabled: true
+  size: 1Gi
+
+grafana.ini:
+  server:
+    root_url: http://grafana.dev.arceon.run
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Mimir
+        type: prometheus
+        uid: mimir
+        url: http://mimir-gateway.mimir.svc.cluster.local/prometheus
+        access: proxy
+        isDefault: true
+        jsonData:
+          prometheusType: Mimir
+          httpHeaderName1: X-Scope-OrgID
+        secureJsonData:
+          httpHeaderValue1: anonymous
+      - name: Loki
+        type: loki
+        uid: loki
+        url: http://loki-gateway.loki.svc.cluster.local
+        access: proxy
+
+testFramework:
+  enabled: false

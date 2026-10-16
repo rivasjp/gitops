@@ -1,0 +1,7 @@
+enableLabel: enable_grafana
+namespace: grafana
+chart:
+  repoURL: https://grafana-community.github.io/helm-charts
+  name: grafana
+  version: 14.0.0
+  releaseName: grafana
