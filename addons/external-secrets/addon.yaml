@@ -1,0 +1,7 @@
+enableLabel: enable_external_secrets
+namespace: external-secrets
+chart:
+  repoURL: https://charts.external-secrets.io
+  name: external-secrets
+  version: 2.12.0
+  releaseName: external-secrets
