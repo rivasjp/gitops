@@ -27,15 +27,11 @@ mimir:
     ingest_storage:
       enabled: false
     ingester:
-      # Chart hardcodes this false unconditionally, assuming ingest-storage
-      # mode (writes via Kafka instead of gRPC) regardless of whether it's
-      # enabled.
       push_grpc_method_enabled: true
       ring:
-        # Mimir's own binary default is 3, unset by the chart. With 1 actual
-        # ingester, quorum reads/writes reject everything as "too many
-        # unhealthy instances" unless this matches our real replica count.
         replication_factor: 1
+    limits:
+      max_label_names_per_series: 50
     blocks_storage:
       s3:
         endpoint: garage.garage.svc.cluster.local:3900
@@ -44,8 +40,6 @@ mimir:
         access_key_id: ${GARAGE_ACCESS_KEY_ID}
         secret_access_key: ${GARAGE_SECRET_ACCESS_KEY}
         insecure: true
-    # alertmanager.data_dir defaults to /data; storage dir must not be a
-    # subdirectory of it (or vice versa) — move data_dir to a sibling path.
     alertmanager:
       data_dir: /data/alertmanager
     alertmanager_storage:
