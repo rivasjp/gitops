@@ -8,10 +8,10 @@ spec:
   auth:
     secretRef:
       accessKeyIDSecretRef:
-        name: aws-ecr-pull
+        name: aws-credentials
         key: access-key-id
       secretAccessKeySecretRef:
-        name: aws-ecr-pull
+        name: aws-credentials
         key: secret-access-key
 ---
 apiVersion: external-secrets.io/v1
