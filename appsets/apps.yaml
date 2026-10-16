@@ -26,10 +26,22 @@ spec:
       name: 'app-{{.name}}-{{.path.basename}}'
     spec:
       project: default
-      source:
-        repoURL: '{{.metadata.annotations.gitops_repo_url}}'
-        targetRevision: '{{.metadata.annotations.gitops_repo_revision}}'
-        path: '{{.path.path}}'
+      sources:
+        - repoURL: '{{.metadata.annotations.gitops_repo_url}}'
+          targetRevision: '{{.metadata.annotations.gitops_repo_revision}}'
+          path: 'charts/{{.path.basename}}'
+          helm:
+            releaseName: '{{.path.basename}}'
+            valueFiles:
+              - $values/{{.path.path}}/values.yaml
+            ignoreMissingValueFiles: true
+            parameters:
+              # From the bridge, so the public repo never holds the account ID.
+              - name: image.registry
+                value: '{{.metadata.annotations.ecr_registry}}'
+        - repoURL: '{{.metadata.annotations.gitops_repo_url}}'
+          targetRevision: '{{.metadata.annotations.gitops_repo_revision}}'
+          ref: values
       destination:
         name: '{{.name}}'
         namespace: fintech
