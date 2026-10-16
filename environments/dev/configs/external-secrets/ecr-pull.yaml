@@ -1,0 +1,82 @@
+apiVersion: generators.external-secrets.io/v1alpha1
+kind: ECRAuthorizationToken
+metadata:
+  name: ecr
+  namespace: external-secrets
+spec:
+  region: us-east-2
+  auth:
+    secretRef:
+      accessKeyIDSecretRef:
+        name: aws-ecr-pull
+        key: access-key-id
+      secretAccessKeySecretRef:
+        name: aws-ecr-pull
+        key: secret-access-key
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: ecr-pull
+  namespace: external-secrets
+spec:
+  refreshInterval: 1h
+  target:
+    name: ecr-pull
+    template:
+      type: kubernetes.io/dockerconfigjson
+      metadata:
+        annotations:
+          expires-at: "{{ .expires_at }}"
+      data:
+        .dockerconfigjson: |
+          {"auths":{"{{ .proxy_endpoint | replace "https://" "" }}":{"username":"{{ .username }}","password":"{{ .password }}","auth":"{{ printf "%s:%s" .username .password | b64enc }}"}}}
+  dataFrom:
+    - sourceRef:
+        generatorRef:
+          apiVersion: generators.external-secrets.io/v1alpha1
+          kind: ECRAuthorizationToken
+          name: ecr
+---
+apiVersion: external-secrets.io/v1
+kind: ClusterSecretStore
+metadata:
+  name: external-secrets
+spec:
+  conditions:
+    - namespaces: [fintech]
+  provider:
+    kubernetes:
+      remoteNamespace: external-secrets
+      server:
+        caProvider:
+          type: ConfigMap
+          name: kube-root-ca.crt
+          key: ca.crt
+          namespace: external-secrets
+      auth:
+        # ESO's own identity; it already reads secrets cluster-wide.
+        serviceAccount:
+          name: external-secrets
+          namespace: external-secrets
+---
+apiVersion: external-secrets.io/v1
+kind: ClusterExternalSecret
+metadata:
+  name: ecr-pull
+spec:
+  namespaces: [fintech]
+  refreshTime: 1m
+  externalSecretName: ecr-pull
+  externalSecretSpec:
+    refreshInterval: 1h
+    secretStoreRef:
+      kind: ClusterSecretStore
+      name: external-secrets
+    target:
+      name: ecr-pull
+      template:
+        type: kubernetes.io/dockerconfigjson
+    dataFrom:
+      - extract:
+          key: ecr-pull
