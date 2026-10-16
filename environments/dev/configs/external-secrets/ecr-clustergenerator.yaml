@@ -1,0 +1,20 @@
+# Trades the bootstrap AWS key for 12h ECR registry tokens, for any namespace.
+apiVersion: generators.external-secrets.io/v1alpha1
+kind: ClusterGenerator
+metadata:
+  name: ecr
+spec:
+  kind: ECRAuthorizationToken
+  generator:
+    ecrAuthorizationTokenSpec:
+      region: us-east-2
+      auth:
+        secretRef:
+          accessKeyIDSecretRef:
+            name: aws-ecr-pull
+            namespace: external-secrets
+            key: access-key-id
+          secretAccessKeySecretRef:
+            name: aws-ecr-pull
+            namespace: external-secrets
+            key: secret-access-key
