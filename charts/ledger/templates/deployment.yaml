@@ -22,6 +22,9 @@ spec:
         - name: ecr-pull
       securityContext:
         runAsNonRoot: true
+        # distroless nonroot; must be numeric for the kubelet to verify it.
+        runAsUser: 65532
+        runAsGroup: 65532
         seccompProfile:
           type: RuntimeDefault
       containers:

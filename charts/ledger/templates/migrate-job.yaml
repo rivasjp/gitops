@@ -7,6 +7,8 @@ metadata:
     {{- include "ledger.componentLabels" (list . "migrate") | nindent 4 }}
   annotations:
     argocd.argoproj.io/sync-wave: "1"
+    # Job specs are immutable; recreate instead of failing when the spec changes.
+    argocd.argoproj.io/sync-options: Force=true,Replace=true
 spec:
   backoffLimit: 3
   template:
@@ -21,6 +23,9 @@ spec:
         - name: ecr-pull
       securityContext:
         runAsNonRoot: true
+        # distroless nonroot; must be numeric for the kubelet to verify it.
+        runAsUser: 65532
+        runAsGroup: 65532
         seccompProfile:
           type: RuntimeDefault
       containers:
