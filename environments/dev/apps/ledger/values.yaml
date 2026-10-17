@@ -1,0 +1,8 @@
+image:
+  tag: 915b78f
+
+ingress:
+  host: ledger.dev.arceon.run
+
+nodeSelector:
+  kubernetes.io/hostname: worker-1
